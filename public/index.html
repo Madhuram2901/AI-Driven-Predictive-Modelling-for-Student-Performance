@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>AI-Driven Student Performance Predictor</h1>
+            <p>Leverage AI to predict and enhance academic success</p>
+        </div>
+
+        <div class="glass-box auth-box" id="login-box">
+            <h2>Login</h2>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button onclick="login(event)">Login</button>
+            <p class="error" id="login-error"></p>
+            <a href="#" onclick="showSignup()">New here? Create an account</a>
+        </div>
+
+        <div class="glass-box auth-box hidden" id="signup-box">
+            <h2>Signup</h2>
+            <input type="email" id="signup-email" placeholder="Email" required>
+            <input type="password" id="signup-password" placeholder="Password" required>
+            <button onclick="signup(event)">Signup</button>
+            <p class="error" id="signup-error"></p>
+            <a href="#" onclick="showLogin()">Already have an account? Login</a>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

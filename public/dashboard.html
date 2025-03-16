@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Welcome to AI Insights Dashboard</h1>
+
+        <!-- Logout Button -->
+        <button id="logout-btn">Logout</button>
+
+        <div class="glass-box card">
+            <h3>Academic Performance Prediction</h3>
+            <canvas id="gradeChart"></canvas>
+            <div class="ai-insight">
+                <h4>AI Insight</h4>
+                <p>Our model predicts a **steady improvement in final exams** based on recent trends.</p>
+            </div>
+        </div>
+
+        <div class="glass-box card">
+            <h3>Attendance Tracker</h3>
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutButton = document.getElementById("logout-btn");
+            if (logoutButton) {
+                logoutButton.addEventListener("click", async () => {
+                    console.log("Logging out...");
+                    await window.logout();
+                });
+            }
+        });
+
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        new Chart(gradeCtx, {
+            type: 'line',
+            data: {
+                labels: ['G1', 'G2', 'Final'],
+                datasets: [{
+                    label: 'Predicted Performance',
+                    data: [7, 8.2, 9.1],
+                    borderColor: '#4CAF50',
+                    fill: false,
+                    tension: 0.4
+                }]
+            }
+        });
+
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(attendanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [90, 10],
+                    backgroundColor: ['#4CAF50', '#FF5733']
+                }]
+            }
+        });
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
