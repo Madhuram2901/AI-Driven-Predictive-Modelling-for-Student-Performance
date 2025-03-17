@@ -69,4 +69,4 @@ node_modules/
 .dataconnect
 
 # Hiding config.json
-config.json
+public/config.json
