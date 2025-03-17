@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>EduAI</span>
+            </div>
+            <h1>Student Performance AI</h1>
+            <p class="tagline">Leverage artificial intelligence to predict and enhance academic success</p>
+        </div>
+
+        <div class="auth-container">
+            <div class="glass-box auth-box" id="login-box">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Sign in to access your dashboard</p>
+
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="login-email" placeholder="Email address" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+
+                <div class="remember-forgot">
+                    <div class="remember">
+                        <input type="checkbox" id="remember-me">
+                        <label for="remember-me">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button onclick="login(event)" class="btn-primary">Sign In</button>
+                <p class="error" id="login-error"></p>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <a href="#" onclick="showSignup()" class="switch-form">New here? Create an account</a>
+            </div>
+
+            <div class="glass-box auth-box hidden" id="signup-box">
+                <h2>Create Account</h2>
+                <p class="subtitle">Join our AI-powered education platform</p>
+
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="signup-name" placeholder="Full name" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="signup-email" placeholder="Email address" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="signup-password" placeholder="Password" required>
+                </div>
+
+                <div class="terms">
+                    <input type="checkbox" id="terms">
+                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy
+                            Policy</a></label>
+                </div>
+
+                <button onclick="signup(event)" class="btn-primary">Create Account</button>
+                <p class="error" id="signup-error"></p>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <a href="#" onclick="showLogin()" class="switch-form">Already have an account? Sign in</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 EduAI. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

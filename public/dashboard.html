@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="user-info">
+                <div class="user-avatar">S</div>
+                <div>
+                    <h3>Welcome, Student</h3>
+                    <p>Last login: Today, 09:15 AM</p>
+                </div>
+            </div>
+            <button id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Current GPA</h4>
+                <div class="stat-value">3.7</div>
+                <div class="stat-trend trend-up">
+                    <i class="fas fa-arrow-up trend-icon"></i> 0.2 from last semester
+                </div>
+            </div>
+            <div class="stat-card">
+                <h4>Attendance Rate</h4>
+                <div class="stat-value">92%</div>
+                <div class="stat-trend trend-up">
+                    <i class="fas fa-arrow-up trend-icon"></i> 5% from last month
+                </div>
+            </div>
+            <div class="stat-card">
+                <h4>Study Hours</h4>
+                <div class="stat-value">24.5</div>
+                <div class="stat-trend trend-up">
+                    <i class="fas fa-arrow-up trend-icon"></i> 3.2 hours this week
+                </div>
+            </div>
+            <div class="stat-card">
+                <h4>Assignments</h4>
+                <div class="stat-value">85%</div>
+                <div class="stat-trend trend-down">
+                    <i class="fas fa-arrow-down trend-icon"></i> 3% completion rate
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active">Performance</div>
+            <div class="tab">Attendance</div>
+            <div class="tab">Recommendations</div>
+            <div class="tab">Learning Path</div>
+        </div>
+
+        <div class="glass-box card">
+            <h3>Academic Performance Prediction</h3>
+            <div class="chart-container">
+                <canvas id="gradeChart"></canvas>
+            </div>
+            <div class="ai-insight">
+                <h4><i class="fas fa-robot"></i> AI Insight</h4>
+                <p>Based on your current study patterns and assignment completion rates, our AI predicts a
+                    <strong>steady improvement in your final exams</strong>. Focusing on Mathematics could further boost
+                    your overall performance by 7%.</p>
+                <div class="recommendation-item">
+                    <strong>Recommendation:</strong> Increase study time for Mathematics by 2 hours per week to maximize
+                    potential grade improvement.
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-box card">
+            <h3>Attendance Tracker</h3>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+            <div class="ai-insight">
+                <h4><i class="fas fa-robot"></i> AI Insight</h4>
+                <p>Your attendance has been consistently above 90% for most subjects. However, there's a noticeable dip
+                    in Computer Science lectures. Our analysis shows a strong correlation between attendance and
+                    performance in this subject.</p>
+            </div>
+        </div>
+
+        <div class="glass-box card">
+            <h3>Learning Style Analysis</h3>
+            <div class="chart-container">
+                <canvas id="learningStyleChart"></canvas>
+            </div>
+            <div class="ai-insight">
+                <h4><i class="fas fa-robot"></i> AI Insight</h4>
+                <p>Your learning style is predominantly visual and kinesthetic. We recommend incorporating more
+                    diagrams, videos, and hands-on exercises in your study routine.</p>
+
+                <h4 class="mt-4">Recommended Resources:</h4>
+                <div class="action-card">
+                    <div class="action-info">
+                        <h4>Visual Learning Materials</h4>
+                        <p>Curated video tutorials for your current courses</p>
+                    </div>
+                    <button class="action-btn">Explore</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-info">
+                        <h4>Interactive Exercises</h4>
+                        <p>Hands-on practice modules for key concepts</p>
+                    </div>
+                    <button class="action-btn">Start</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-box card">
+            <h3>Study Session Planner</h3>
+            <div class="chart-container">
+                <canvas id="studyDistributionChart"></canvas>
+            </div>
+            <div class="ai-insight">
+                <h4><i class="fas fa-robot"></i> AI Insight</h4>
+                <p>Based on your performance data, we've identified optimal study times and subject distribution for
+                    your upcoming exams.</p>
+
+                <h4>Recommended Study Plan:</h4>
+                <div class="recommendation-item">
+                    <span class="badge badge-primary">Mathematics</span>
+                    <strong>8 hours/week</strong> - Focus on calculus and statistical analysis
+                </div>
+                <div class="recommendation-item">
+                    <span class="badge badge-success">Computer Science</span>
+                    <strong>6 hours/week</strong> - Prioritize programming exercises
+                </div>
+                <div class="recommendation-item">
+                    <span class="badge badge-warning">Physics</span>
+                    <strong>5 hours/week</strong> - Review theoretical concepts and problem-solving
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 EduAI. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutButton = document.getElementById("logout-btn");
+            if (logoutButton) {
+                logoutButton.addEventListener("click", async () => {
+                    console.log("Logging out...");
+                    // Await window.logout if it exists
+                    if (typeof window.logout === 'function') {
+                        await window.logout();
+                    } else {
+                        // Fallback logout logic if function doesn't exist
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
+
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    // In a real application, we would show/hide content based on the selected tab
+                });
+            });
+
+            // Initialize charts
+            initializeCharts();
+        });
+
+        function initializeCharts() {
+            // Grade prediction chart
+            const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+            new Chart(gradeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Midterm 1', 'Midterm 2', 'Current', 'Predicted Final'],
+                    datasets: [{
+                        label: 'Mathematics',
+                        data: [72, 78, 82, 88],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#4361ee',
+                        pointRadius: 5,
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Computer Science',
+                        data: [85, 82, 80, 84],
+                        borderColor: '#4cc9f0',
+                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#4cc9f0',
+                        pointRadius: 5,
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Physics',
+                        data: [76, 79, 83, 87],
+                        borderColor: '#f72585',
+                        backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#f72585',
+                        pointRadius: 5,
+                        tension: 0.4,
+                        fill: true
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: "'Poppins', sans-serif",
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            bodyFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: "'Poppins', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: "'Poppins', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Attendance chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(attendanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mathematics', 'Computer Science', 'Physics', 'Literature', 'History'],
+                    datasets: [{
+                        label: 'Attendance Rate (%)',
+                        data: [95, 82, 90, 97, 88],
+                        backgroundColor: [
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(247, 37, 133, 0.7)',
+                            'rgba(76, 175, 80, 0.7)',
+                            'rgba(255, 193, 7, 0.7)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            bodyFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: "'Poppins', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: "'Poppins', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Learning style chart
+            const learningStyleCtx = document.getElementById('learningStyleChart').getContext('2d');
+            new Chart(learningStyleCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Visual', 'Auditory', 'Reading/Writing', 'Kinesthetic', 'Group', 'Individual'],
+                    datasets: [{
+                        label: 'Your Learning Style',
+                        data: [85, 65, 70, 80, 55, 75],
+                        backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                        borderColor: 'rgba(76, 201, 240, 0.8)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(76, 201, 240, 1)',
+                        pointRadius: 4
+                    }, {
+                        label: 'Class Average',
+                        data: [70, 75, 80, 60, 65, 70],
+                        backgroundColor: 'rgba(247, 37, 133, 0.2)',
+                        borderColor: 'rgba(247, 37, 133, 0.8)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(247, 37, 133, 1)',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: "'Poppins', sans-serif",
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            bodyFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                display: false,
+                                stepSize: 20
+                            },
+                            pointLabels: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: "'Poppins', sans-serif",
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Study distribution chart
+            const studyDistributionCtx = document.getElementById('studyDistributionChart').getContext('2d');
+            new Chart(studyDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Mathematics', 'Computer Science', 'Physics', 'Literature', 'History'],
+                    datasets: [{
+                        data: [8, 6, 5, 3, 2],
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.8)',
+                            'rgba(76, 201, 240, 0.8)',
+                            'rgba(247, 37, 133, 0.8)',
+                            'rgba(76, 175, 80, 0.8)',
+                            'rgba(255, 193, 7, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: 'rgba(21, 21, 21, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: "'Poppins', sans-serif",
+                                    size: 12
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            bodyFont: {
+                                family: "'Poppins', sans-serif"
+                            },
+                            padding: 12,
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.label}: ${context.raw} hours/week`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
