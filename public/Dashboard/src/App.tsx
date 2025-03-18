@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,8 @@ import Attendance from "./pages/Attendance";
 import GPA from "./pages/GPA";
 import Predictions from "./pages/Predictions";
 import Assignments from "./pages/Assignments";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,8 @@ const App = () => (
             <Route path="/gpa" element={<GPA />} />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/predictions" element={<Predictions />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

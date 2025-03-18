@@ -49,7 +49,18 @@ const Attendance = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [subjects, setSubjects] = useState(getStoredSubjects());
-  const [attendanceData, setAttendanceData] = useState(generateMockAttendanceData(subjects));
+  const [attendanceData, setAttendanceData] = useState(() => {
+    const stored = localStorage.getItem('attendanceData');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return generateMockAttendanceData(subjects);
+  });
+  
+  // Save attendance data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+  }, [attendanceData]);
   
   // Calculate attendance statistics
   const calculateAttendanceStats = () => {
@@ -215,7 +226,7 @@ const Attendance = () => {
                     </CardDescription>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <div className="w-full sm:w-[180px]">
                       <Input
                         placeholder="Search subjects..."

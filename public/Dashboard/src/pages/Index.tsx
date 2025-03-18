@@ -1,8 +1,8 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import LoginForm from '@/components/LoginForm';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Index = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,7 +17,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -39,12 +39,12 @@ const Index = () => {
       <main className="flex-grow flex flex-col items-center justify-center p-6 relative">
         <div className="w-full max-w-5xl mx-auto flex flex-col-reverse md:flex-row items-center gap-8 md:gap-16">
           {/* Form section */}
-          <div className="w-full md:w-1/2 flex justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="w-full md:w-1/2 flex justify-center animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '0.5s', animationFillMode: 'forwards' }}>
             <LoginForm />
           </div>
           
           {/* Hero content */}
-          <div className="w-full md:w-1/2 text-center md:text-left space-y-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="w-full md:w-1/2 text-center md:text-left space-y-6 animate-fade-in" style={{ animationDelay: '0.1s', animationDuration: '0.5s', animationFillMode: 'forwards' }}>
             <div className="space-y-2">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-600">
                 ScholarInsight

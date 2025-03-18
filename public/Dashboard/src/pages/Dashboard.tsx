@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '@/components/Navbar';
 import PerformanceChart from '@/components/PerformanceChart';
@@ -26,17 +26,93 @@ const studentPerformance = [
   { name: 'Week 8', gpa: 3.8, attendance: 100, studyHours: 18 },
 ];
 
-const upcomingAssignments = [
-  { id: 1, title: 'Mathematics Homework', dueDate: '2023-11-20', subject: 'Mathematics', status: 'pending' },
-  { id: 2, title: 'Physics Lab Report', dueDate: '2023-11-22', subject: 'Physics', status: 'pending' },
-  { id: 3, title: 'History Essay', dueDate: '2023-11-25', subject: 'History', status: 'in-progress' },
-];
+// Get assignments from localStorage or use defaults
+const getStoredAssignments = () => {
+  const stored = localStorage.getItem('assignments');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return [
+    { 
+      id: 1, 
+      title: 'Mathematics Homework 3.4', 
+      description: 'Complete exercises 1-15, show all work', 
+      subject: 'Mathematics', 
+      dueDate: '2023-11-20', 
+      status: 'pending',
+      priority: 'high',
+      estimatedHours: 2
+    },
+    { 
+      id: 2, 
+      title: 'Physics Lab Report', 
+      description: 'Write up results from the pendulum experiment', 
+      subject: 'Physics', 
+      dueDate: '2023-11-22', 
+      status: 'in-progress',
+      priority: 'medium',
+      estimatedHours: 3
+    },
+    { 
+      id: 3, 
+      title: 'History Essay', 
+      description: 'Research paper on the Industrial Revolution', 
+      subject: 'History', 
+      dueDate: '2023-11-25', 
+      status: 'in-progress',
+      priority: 'high',
+      estimatedHours: 5
+    }
+  ];
+};
 
 const Dashboard = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [subjects, setSubjects] = useState(getStoredSubjects());
   const [historicalGPA, setHistoricalGPA] = useState(getStoredHistoricalGPA());
+  const [assignments, setAssignments] = useState(getStoredAssignments());
+  const [attendanceRate, setAttendanceRate] = useState(0);
   
+  useEffect(() => {
+    // Update assignments when localStorage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'assignments' && e.newValue) {
+        setAssignments(JSON.parse(e.newValue));
+      }
+      if (e.key === 'attendanceData' && e.newValue) {
+        const data = JSON.parse(e.newValue);
+        const totalClasses = data.reduce((sum: number, subject: any) => sum + subject.totalClasses, 0);
+        const totalAttended = data.reduce((sum: number, subject: any) => sum + subject.attended, 0);
+        setAttendanceRate((totalAttended / totalClasses) * 100);
+      }
+    };
+
+    // Initial load from localStorage
+    const storedAssignments = localStorage.getItem('assignments');
+    if (storedAssignments) {
+      setAssignments(JSON.parse(storedAssignments));
+    }
+
+    const storedAttendanceData = localStorage.getItem('attendanceData');
+    if (storedAttendanceData) {
+      const data = JSON.parse(storedAttendanceData);
+      const totalClasses = data.reduce((sum: number, subject: any) => sum + subject.totalClasses, 0);
+      const totalAttended = data.reduce((sum: number, subject: any) => sum + subject.attended, 0);
+      setAttendanceRate((totalAttended / totalClasses) * 100);
+    }
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Refresh assignments when component mounts and after any changes
+  useEffect(() => {
+    const storedAssignments = localStorage.getItem('assignments');
+    if (storedAssignments) {
+      setAssignments(JSON.parse(storedAssignments));
+    }
+  }, []);
+
   // Calculate current GPA
   const calculateCurrentGPA = () => {
     const grades = subjects.flatMap(subject => 
@@ -56,6 +132,17 @@ const Dashboard = () => {
   const currentGPA = calculateCurrentGPA();
   const previousGPA = calculatePreviousGPA();
   const gpaChange = currentGPA - previousGPA;
+
+  // Get upcoming assignments (pending or in-progress, sorted by due date)
+  const upcomingAssignments = assignments
+    .filter(a => a.status !== 'completed')
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .slice(0, 3);
+
+  // Calculate assignment completion rate
+  const completionRate = assignments.length > 0
+    ? Math.round((assignments.filter(a => a.status === 'completed').length / assignments.length) * 100)
+    : 0;
   
   if (isLoading) {
     return (
@@ -79,7 +166,7 @@ const Dashboard = () => {
           <section className="mt-4">
             <div className="animate-fade-in">
               <h1 className="text-3xl font-bold tracking-tight">
-                Welcome back, {user?.name}
+                Welcome back, {user?.displayName || 'User'}
               </h1>
               <p className="text-muted-foreground mt-1">
                 Here's an overview of your academic progress
@@ -114,9 +201,17 @@ const Dashboard = () => {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">92%</div>
+                <div className="text-2xl font-bold">{attendanceRate.toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600 dark:text-green-400 font-medium">+5%</span> from last month
+                  <span className={`font-medium ${
+                    attendanceRate >= 90 ? "text-green-600 dark:text-green-400" :
+                    attendanceRate >= 75 ? "text-amber-600 dark:text-amber-400" :
+                    "text-red-600 dark:text-red-400"
+                  }`}>
+                    {attendanceRate >= 90 ? "Excellent" :
+                     attendanceRate >= 75 ? "Good" :
+                     "Needs Improvement"}
+                  </span> attendance status
                 </p>
               </CardContent>
             </Card>
@@ -144,9 +239,11 @@ const Dashboard = () => {
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">85%</div>
+                <div className="text-2xl font-bold">{completionRate}%</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">3</span> assignments pending
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                    {assignments.filter(a => a.status !== 'completed').length}
+                  </span> assignments pending
                 </p>
               </CardContent>
             </Card>
@@ -164,7 +261,7 @@ const Dashboard = () => {
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              <AttendanceCalendar className="h-full" studentName={user?.name} />
+              <AttendanceCalendar className="h-full" studentName={user?.displayName} />
             </div>
           </section>
           
@@ -179,8 +276,8 @@ const Dashboard = () => {
                       Stay on top of your deadlines
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
-                    View All
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/assignments">View All</Link>
                   </Button>
                 </div>
               </CardHeader>
@@ -193,23 +290,32 @@ const Dashboard = () => {
                           <span className="font-medium">{assignment.title}</span>
                           <span 
                             className={`text-xs px-2 py-0.5 rounded-full font-medium 
-                              ${assignment.status === 'pending' 
-                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' 
-                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                              ${assignment.priority === 'high'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                : assignment.priority === 'medium'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                               }`}
                           >
-                            {assignment.status === 'pending' ? 'Due Soon' : 'In Progress'}
+                            {assignment.priority.charAt(0).toUpperCase() + assignment.priority.slice(1)} Priority
                           </span>
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">
                           Subject: {assignment.subject} | Due Date: {assignment.dueDate}
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-xs">
-                        Start Work <ArrowUpRight className="ml-1 h-3 w-3" />
-                      </Button>
+                      <Link to="/assignments">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          View Details <ArrowUpRight className="ml-1 h-3 w-3" />
+                        </Button>
+                      </Link>
                     </div>
                   ))}
+                  {upcomingAssignments.length === 0 && (
+                    <div className="text-center text-muted-foreground py-6">
+                      No upcoming assignments!
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -235,24 +341,18 @@ const Dashboard = () => {
                   <div className="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-900/30">
                     <h4 className="font-medium text-sm mb-2">Personalized Recommendations</h4>
                     <ul className="text-sm space-y-1">
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">•</span>
-                        Consider increasing study time for History to improve your grade from B+ to A.
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">•</span>
-                        Your visual learning style suggests using more diagrams and charts for Physics concepts.
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">•</span>
-                        Schedule your study sessions in 25-minute blocks for optimal focus and retention.
-                      </li>
+                      {subjects.slice(0, 3).map((subject, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-green-500 mr-2">•</span>
+                          Consider increasing study time for {subject.name} to improve your grade.
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
                 
-                <Button variant="outline" className="w-full bg-white/50 dark:bg-gray-900/50">
-                  Get More Detailed Analysis
+                <Button variant="outline" className="w-full bg-white/50 dark:bg-gray-900/50" asChild>
+                  <Link to="/predictions">Get More Detailed Analysis</Link>
                 </Button>
               </CardContent>
             </Card>

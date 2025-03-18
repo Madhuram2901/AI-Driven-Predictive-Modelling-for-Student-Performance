@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '@/components/Navbar';
@@ -152,12 +151,69 @@ type FormValues = Omit<Assignment, 'id'>;
 
 const Assignments = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const [assignments, setAssignments] = useState<Assignment[]>(mockAssignments);
+  const [assignments, setAssignments] = useState(() => {
+    const stored = localStorage.getItem('assignments');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error('Error parsing stored assignments:', e);
+        return mockAssignments;
+      }
+    }
+    return mockAssignments;
+  });
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterSubject, setFilterSubject] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  
+  // Add effect to handle storage events
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'assignments' && e.newValue) {
+        try {
+          setAssignments(JSON.parse(e.newValue));
+        } catch (e) {
+          console.error('Error parsing assignments from storage event:', e);
+        }
+      }
+    };
+
+    // Also listen for storage events from the same window
+    const handleLocalStorageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.key === 'assignments') {
+        try {
+          setAssignments(JSON.parse(customEvent.detail.value));
+        } catch (e) {
+          console.error('Error parsing assignments from local storage event:', e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('localStorageChange', handleLocalStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageChange', handleLocalStorageChange);
+    };
+  }, []);
+
+  // Add effect to save assignments to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('assignments', JSON.stringify(assignments));
+      // Dispatch a custom event for same-window updates
+      window.dispatchEvent(new CustomEvent('localStorageChange', {
+        detail: { key: 'assignments', value: JSON.stringify(assignments) }
+      }));
+    } catch (e) {
+      console.error('Error saving assignments to localStorage:', e);
+    }
+  }, [assignments]);
   
   const form = useForm<FormValues>({
     defaultValues: {
@@ -209,7 +265,7 @@ const Assignments = () => {
   };
   
   // Handle form submission
-  const onSubmit = (data: FormValues) => {
+  const handleSubmit = (data: FormValues) => {
     if (editingAssignment) {
       // Update existing assignment
       const updatedAssignments = assignments.map(a => 
@@ -223,7 +279,8 @@ const Assignments = () => {
         ...data,
         id: assignments.length ? Math.max(...assignments.map(a => a.id)) + 1 : 1
       };
-      setAssignments([...assignments, newAssignment]);
+      const newAssignments = [...assignments, newAssignment];
+      setAssignments(newAssignments);
       toast.success("New assignment added");
     }
     
@@ -233,12 +290,13 @@ const Assignments = () => {
   
   // Delete assignment
   const handleDelete = (id: number) => {
-    setAssignments(assignments.filter(a => a.id !== id));
+    const updatedAssignments = assignments.filter(a => a.id !== id);
+    setAssignments(updatedAssignments);
     toast.success("Assignment deleted");
   };
   
   // Toggle assignment status
-  const toggleStatus = (id: number, newStatus: 'pending' | 'in-progress' | 'completed') => {
+  const toggleStatus = (id: number, newStatus: AssignmentStatus) => {
     const updatedAssignments = assignments.map(a => 
       a.id === id ? { ...a, status: newStatus } : a
     );
@@ -305,7 +363,7 @@ const Assignments = () => {
                   </DialogHeader>
                   
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                       <FormField
                         control={form.control}
                         name="title"

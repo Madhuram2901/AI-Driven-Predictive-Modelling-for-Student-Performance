@@ -63,8 +63,8 @@ const GPA = () => {
   const getCurrentAndPreviousGrades = (subject: typeof subjects[0]) => {
     const sortedGrades = [...subject.grades].sort((a, b) => b.semester.localeCompare(a.semester));
     return {
-      current: sortedGrades[0]?.grade || 'N/A',
-      previous: sortedGrades[1]?.grade || 'N/A'
+      current: sortedGrades[0]?.grade,
+      previous: sortedGrades[1]?.grade
     };
   };
 
@@ -81,9 +81,13 @@ const GPA = () => {
   const averageGrade = calculateAverageGrade();
   const averagePercentage = GRADE_PERCENTAGE[averageGrade.toFixed(1) as keyof typeof GRADE_PERCENTAGE] || 0;
 
-  // Filter subjects based on search term
+  // Filter subjects based on search term and having grades
   const filteredSubjects = subjects
-    .filter(subject => subject.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(subject => {
+      const grades = getCurrentAndPreviousGrades(subject);
+      return subject.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+             (grades.current || grades.previous);
+    })
     .sort((a, b) => {
       const aGrade = getCurrentAndPreviousGrades(a).current;
       const bGrade = getCurrentAndPreviousGrades(b).current;
@@ -152,7 +156,7 @@ const GPA = () => {
             <Card className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <CardHeader className="pb-2">
                 <CardTitle>Average Grade</CardTitle>
-                <CardDescription>Computer Science GPA</CardDescription>
+                <CardDescription>Current Semester GPA</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex items-center justify-center h-40">
@@ -186,14 +190,19 @@ const GPA = () => {
                 <div className="h-[250px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={subjects.map(subject => {
-                        const grades = getCurrentAndPreviousGrades(subject);
-                        return {
-                          name: subject.name,
-                          currentGrade: GRADE_PERCENTAGE[grades.current as keyof typeof GRADE_PERCENTAGE] || 0,
-                          previousGrade: GRADE_PERCENTAGE[grades.previous as keyof typeof GRADE_PERCENTAGE] || 0
-                        };
-                      })}
+                      data={subjects
+                        .filter(subject => {
+                          const grades = getCurrentAndPreviousGrades(subject);
+                          return grades.current || grades.previous;
+                        })
+                        .map(subject => {
+                          const grades = getCurrentAndPreviousGrades(subject);
+                          return {
+                            name: subject.name,
+                            currentGrade: grades.current ? GRADE_PERCENTAGE[grades.current as keyof typeof GRADE_PERCENTAGE] : null,
+                            previousGrade: grades.previous ? GRADE_PERCENTAGE[grades.previous as keyof typeof GRADE_PERCENTAGE] : null
+                          };
+                        })}
                       margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -201,16 +210,20 @@ const GPA = () => {
                       <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                       <Tooltip
                         content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
+                          if (active && payload && payload.length > 0) {
                             return (
                               <div className="bg-background border border-border p-3 rounded-md shadow-md">
                                 <p className="font-medium">{label}</p>
-                                <p className="text-sm text-blue-600 dark:text-blue-400">
-                                  Current: {formatChartValue(payload[0].value)}%
-                                </p>
-                                <p className="text-sm text-amber-600 dark:text-amber-400">
-                                  Previous: {formatChartValue(payload[1].value)}%
-                                </p>
+                                {payload.length > 0 && payload[0]?.value !== null && (
+                                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                                    Current: {formatChartValue(payload[0].value)}%
+                                  </p>
+                                )}
+                                {payload.length > 1 && payload[1]?.value !== null && (
+                                  <p className="text-sm text-amber-600 dark:text-amber-400">
+                                    Previous: {formatChartValue(payload[1].value)}%
+                                  </p>
+                                )}
                               </div>
                             );
                           }
@@ -291,24 +304,24 @@ const GPA = () => {
                         {filteredSubjects.length > 0 ? (
                           filteredSubjects.map((subject) => {
                             const grades = getCurrentAndPreviousGrades(subject);
-                            const currentGPA = GRADE_MAPPING[grades.current as keyof typeof GRADE_MAPPING] || 0;
-                            const previousGPA = GRADE_MAPPING[grades.previous as keyof typeof GRADE_MAPPING] || 0;
-                            const change = currentGPA - previousGPA;
+                            const currentGPA = grades.current ? GRADE_MAPPING[grades.current as keyof typeof GRADE_MAPPING] : null;
+                            const previousGPA = grades.previous ? GRADE_MAPPING[grades.previous as keyof typeof GRADE_MAPPING] : null;
+                            const change = currentGPA && previousGPA ? currentGPA - previousGPA : null;
                             return (
                               <TableRow key={subject.id}>
                                 <TableCell className="font-medium">
                                   {subject.name}
                                 </TableCell>
                                 <TableCell>
-                                  {grades.current} ({GRADE_PERCENTAGE[grades.current as keyof typeof GRADE_PERCENTAGE]}%)
+                                  {grades.current && `${grades.current} (${GRADE_PERCENTAGE[grades.current as keyof typeof GRADE_PERCENTAGE]}%)`}
                                 </TableCell>
                                 <TableCell>
-                                  {grades.previous} ({GRADE_PERCENTAGE[grades.previous as keyof typeof GRADE_PERCENTAGE]}%)
+                                  {grades.previous && `${grades.previous} (${GRADE_PERCENTAGE[grades.previous as keyof typeof GRADE_PERCENTAGE]}%)`}
                                 </TableCell>
-                                <TableCell className={change >= 0 ? 
+                                <TableCell className={change !== null ? (change >= 0 ? 
                                   'text-green-600 dark:text-green-400' : 
-                                  'text-red-600 dark:text-red-400'}>
-                                  {change > 0 ? '+' : ''}{change.toFixed(1)}
+                                  'text-red-600 dark:text-red-400') : ''}>
+                                  {change !== null && `${change > 0 ? '+' : ''}${change.toFixed(1)}`}
                                 </TableCell>
                               </TableRow>
                             );
@@ -316,7 +329,7 @@ const GPA = () => {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={4} className="h-24 text-center">
-                              No subjects found.
+                              No grades added yet. Add your first grade to get started!
                             </TableCell>
                           </TableRow>
                         )}

@@ -89,7 +89,8 @@ const Navbar = () => {
     }
   }, []);
   
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
     return name
       .split(' ')
       .map(part => part[0])
@@ -129,7 +130,7 @@ const Navbar = () => {
             ))}
           </nav>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -153,27 +154,31 @@ const Navbar = () => {
                   >
                     <Avatar>
                       <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                      <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
