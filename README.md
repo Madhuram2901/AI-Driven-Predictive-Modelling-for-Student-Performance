@@ -26,3 +26,14 @@ Then
 Optionally - if you are using your own API key:   
 ```firebase deploy```
 
+## How to run the webapp
+
+
+ 
+
+```sh
+npm i
+
+npm run dev
+```
+
