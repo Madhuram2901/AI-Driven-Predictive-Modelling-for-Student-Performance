@@ -108,7 +108,7 @@ const Navbar = () => {
                 SI
               </div>
               <span className="ml-2 text-xl font-semibold hidden sm:inline-block">
-                StudyInsight
+                ScholarInsights
               </span>
             </Link>
           </div>
